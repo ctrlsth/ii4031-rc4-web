@@ -47,7 +47,7 @@ export default function Home() {
 
   const resetKey = () => {
     setKey("");
-  }
+  };
 
   const resetAffineKey = () => {
     setBKey(0);
@@ -142,6 +142,21 @@ export default function Home() {
       return true;
     }
     return false;
+  };
+
+  const copyContent = async (type: number) => {
+    try {
+      if (type == 1) {
+        await navigator.clipboard.writeText(inputText);
+      } else if (type == 2) {
+        await navigator.clipboard.writeText(resultText.toString());
+      } else {
+        await navigator.clipboard.writeText(encodeBase64(resultText));
+      }
+      console.log("Content copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
   };
 
   return (
@@ -261,9 +276,9 @@ export default function Home() {
             <Button
               isDisabled={
                 !key ||
-                !mKey || 
-                !bKey || 
-                !relativelyPrime(mKey) || 
+                !mKey ||
+                !bKey ||
+                !relativelyPrime(mKey) ||
                 !inputText ||
                 (!file && inputType === "file")
               }
@@ -279,9 +294,9 @@ export default function Home() {
             <Button
               isDisabled={
                 !key ||
-                !mKey || 
-                !bKey || 
-                !relativelyPrime(mKey) || 
+                !mKey ||
+                !bKey ||
+                !relativelyPrime(mKey) ||
                 !inputText ||
                 (!file && inputType === "file")
               }
@@ -309,26 +324,37 @@ export default function Home() {
             paddingBottom={8}
             gap={4}>
             {/* {algo != "Extended Vigenere Cipher" ? ( */}
-              <Flex flexDir={"column"}>
-                {click === "encrypt" ? (
-                  <FormLabel>Plaintext</FormLabel>
-                ) : (
-                  <FormLabel>Ciphertext</FormLabel>
-                )}
-                <Flex
-                  bgColor={DEFAULT_BG_COLOR}
-                  minHeight={"100px"}
-                  maxHeight={"250px"}
-                  borderRadius={"6px"}
-                  border={"1px solid #e2e8f0"}
-                  paddingX={4}
-                  paddingY={2}
-                  maxWidth={"100%"}
-                  wordBreak={"break-all"}
-                  overflowY={"scroll"}>
-                  {text}
-                </Flex>
+            <Flex flexDir={"column"}>
+              {click === "encrypt" ? (
+                <FormLabel>Plaintext</FormLabel>
+              ) : (
+                <FormLabel>Ciphertext</FormLabel>
+              )}
+              <Flex
+                bgColor={DEFAULT_BG_COLOR}
+                minHeight={"100px"}
+                maxHeight={"250px"}
+                borderRadius={"6px"}
+                border={"1px solid #e2e8f0"}
+                paddingX={4}
+                paddingY={2}
+                maxWidth={"100%"}
+                wordBreak={"break-all"}
+                overflowY={"scroll"}>
+                {text}
               </Flex>
+              <Flex justifyContent={"end"} paddingTop={2}>
+                <Button
+                  colorScheme="grey"
+                  variant="outline"
+                  paddingX={4}
+                  paddingY={4}
+                  maxWidth={"20%"}
+                  onClick={(e: any) => copyContent(1)}>
+                  Copy Text!
+                </Button>
+              </Flex>
+            </Flex>
             {/* ) : null} */}
             <Flex flexDir={"column"}>
               <FormLabel>Result</FormLabel>
@@ -345,6 +371,17 @@ export default function Home() {
                 overflowY={"scroll"}>
                 {resultText}
               </Flex>
+              <Flex justifyContent={"end"} paddingTop={2}>
+                <Button
+                  colorScheme="grey"
+                  variant="outline"
+                  paddingX={4}
+                  paddingY={4}
+                  maxWidth={"20%"}
+                  onClick={(e: any) => copyContent(2)}>
+                  Copy Text!
+                </Button>
+              </Flex>
             </Flex>
             <Flex flexDir={"column"}>
               <FormLabel>Result in Base64 Format</FormLabel>
@@ -360,6 +397,17 @@ export default function Home() {
                 wordBreak={"break-all"}
                 overflowY={"scroll"}>
                 {encodeBase64(resultText)}
+              </Flex>
+              <Flex justifyContent={"end"} paddingTop={2}>
+                <Button
+                  colorScheme="grey"
+                  variant="outline"
+                  paddingX={4}
+                  paddingY={4}
+                  maxWidth={"20%"}
+                  onClick={(e: any) => copyContent(3)}>
+                  Copy Text!
+                </Button>
               </Flex>
             </Flex>
           </Flex>
