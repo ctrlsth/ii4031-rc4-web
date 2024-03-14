@@ -1,6 +1,6 @@
 const MAX_LENGTH = 256;
 
-const relativelyPrime = (m: number): boolean => {
+export const relativelyPrime = (m: number): boolean => {
   if (m % 2 == 0 || m % MAX_LENGTH == 0 || m <= 1) {
     return false;
   }
