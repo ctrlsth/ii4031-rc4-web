@@ -5,7 +5,6 @@
 ## Table of Contents
 
 - [Program Description](#program-description)
-- [List of Cipher Algorithm](#list-of-cipher-algorithm)
 - [Requirements](#requirements)
 - [How to Run the Program](#how-to-run-the-program)
 - [Project Structure](#project-structure)
