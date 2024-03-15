@@ -103,7 +103,7 @@ export default function Home() {
 
   return (
     <ChakraProvider>
-      <title>RC4 Stream Cipher Tool</title>
+      <title>Modified RC4 - Stream Cipher Tool</title>
       <Flex
         bgColor={"#f2f4f6"}
         minHeight={"100vh"}
