@@ -8,8 +8,6 @@ import {
   Heading,
   NumberInput,
   Input,
-  Radio,
-  RadioGroup,
   Select,
   Textarea,
   NumberInputField,
@@ -19,22 +17,10 @@ import {
 } from "@chakra-ui/react";
 import React, { ReactHTMLElement, useEffect, useState } from "react";
 import { rc4, relativelyPrime } from "../utils/rc4";
-import { encVigenere, decVigenere } from "@/utils/vigenere";
 
 const DEFAULT_BG_COLOR = "#ffffff";
-const ALGO_LIST = [
-  "Vigenere Cipher",
-  "Extended Vigenere Cipher",
-  "Autokey Vigenere Cipher",
-  "Playfair Cipher",
-  "Product Cipher",
-  "Affine Cipher",
-];
 
 export default function Home() {
-  const [value, setValue] = useState("encrypt");
-  const [click, setClick] = useState<string>("");
-  // const [algo, setAlgo] = useState<string>("");
   const [inputType, setInputType] = useState<string>("text");
   const [inputText, setInputText] = useState<string>("");
   const [text, setText] = useState<string>("");
@@ -44,28 +30,6 @@ export default function Home() {
   const [resultText, setResultText] = useState<String>("");
   const [file, setFile] = useState<File | null>();
   const [fileName, setFileName] = useState("");
-
-  const resetKey = () => {
-    setKey("");
-  };
-
-  const resetAffineKey = () => {
-    setBKey(0);
-    setMKey(0);
-  };
-
-  const hasAlphabet = (input: string) => {
-    return /[a-zA-Z]/.test(input.replace(/[^A-Za-z]/g, ""));
-  };
-
-  // const handleAlgoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   setAlgo(e.target.value);
-  //   if (e.target.value === "Affine Cipher") {
-  //     resetKey();
-  //   } else {
-  //     resetAffineKey();
-  //   }
-  // };
 
   const handleInputTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInputType(e.target.value);
@@ -107,41 +71,19 @@ export default function Home() {
 
     const blob = new Blob([new Uint8Array(output)]);
     link.href = URL.createObjectURL(blob);
+    // console.log(fileName);
 
     if (fileName === "") {
-      if (value === "encrypt") {
-        link.download = "encrypted_result.txt";
-      } else if (value === "decrypt") {
-        link.download = "decrypted_result.txt";
-      } else {
-        link.download = "result.txt";
-      }
+      link.download = "result.txt";
     } else {
-      if (value === "encrypt") {
-        link.download = "encrypted_result_" + fileName;
-      } else if (value === "decrypt") {
-        link.download = "decrypted_result_" + fileName;
-      } else {
-        link.download = "result.txt";
-      }
+      link.download = "result_" + fileName;
     }
 
     link.click();
   };
 
-  const handleEncrypt = () => {
+  const handleOperation = () => {
     setResultText(rc4(key, inputText, mKey, bKey));
-  };
-
-  const handleDecrypt = () => {
-    setResultText(rc4(key, inputText, mKey, bKey));
-  };
-
-  const isTxtFile = (fileName: string): boolean => {
-    if (fileName.slice(fileName.indexOf("."), fileName.length) === ".txt") {
-      return true;
-    }
-    return false;
   };
 
   const copyContent = async (type: number) => {
@@ -153,7 +95,7 @@ export default function Home() {
       } else {
         await navigator.clipboard.writeText(encodeBase64(resultText));
       }
-      console.log("Content copied to clipboard");
+      // console.log("Content copied to clipboard");
     } catch (err) {
       console.error("Failed to copy: ", err);
     }
@@ -161,7 +103,7 @@ export default function Home() {
 
   return (
     <ChakraProvider>
-      <title>NDCrypto - Cipher Tool</title>
+      <title>RC4 Stream Cipher Tool</title>
       <Flex
         bgColor={"#f2f4f6"}
         minHeight={"100vh"}
@@ -264,51 +206,24 @@ export default function Home() {
               </NumberInput>
             </Flex>
           </Flex>
-          <RadioGroup onChange={setValue} value={value}>
-            <Flex gap={4}>
-              <Radio value="encrypt">Encrypt</Radio>
-              <Radio value="decrypt">Decrypt</Radio>
-            </Flex>
-          </RadioGroup>
         </Flex>
         <ButtonGroup spacing={4}>
-          {value === "encrypt" ? (
-            <Button
-              isDisabled={
-                !key ||
-                !mKey ||
-                !bKey ||
-                !relativelyPrime(mKey) ||
-                !inputText ||
-                (!file && inputType === "file")
-              }
-              onClick={(e) => {
-                handleEncrypt();
-                setClick("encrypt");
-                setText(inputText);
-              }}
-              colorScheme="green">
-              Encrypt
-            </Button>
-          ) : (
-            <Button
-              isDisabled={
-                !key ||
-                !mKey ||
-                !bKey ||
-                !relativelyPrime(mKey) ||
-                !inputText ||
-                (!file && inputType === "file")
-              }
-              onClick={(e) => {
-                handleDecrypt();
-                setClick("decrypt");
-                setText(inputText);
-              }}
-              colorScheme="orange">
-              Decrypt
-            </Button>
-          )}
+          <Button
+            isDisabled={
+              !key ||
+              !mKey ||
+              !bKey ||
+              !relativelyPrime(mKey) ||
+              !inputText ||
+              (!file && inputType === "file")
+            }
+            onClick={(e) => {
+              handleOperation();
+              setText(inputText);
+            }}
+            colorScheme="green">
+            Run
+          </Button>
           <Button
             isDisabled={!resultText}
             onClick={saveToBinaryFile}
@@ -323,13 +238,8 @@ export default function Home() {
             width={{ base: "80%", md: "70%" }}
             paddingBottom={8}
             gap={4}>
-            {/* {algo != "Extended Vigenere Cipher" ? ( */}
             <Flex flexDir={"column"}>
-              {click === "encrypt" ? (
-                <FormLabel>Plaintext</FormLabel>
-              ) : (
-                <FormLabel>Ciphertext</FormLabel>
-              )}
+              <FormLabel>Plaintext / Ciphertext</FormLabel>
               <Flex
                 bgColor={DEFAULT_BG_COLOR}
                 minHeight={"100px"}
@@ -345,17 +255,19 @@ export default function Home() {
               </Flex>
               <Flex justifyContent={"end"} paddingTop={2}>
                 <Button
-                  colorScheme="grey"
-                  variant="outline"
+                  bg="gray.400"
+                  color="white"
                   paddingX={4}
                   paddingY={4}
                   maxWidth={"20%"}
+                  _hover={{
+                    bg: "gray.500",
+                  }}
                   onClick={(e: any) => copyContent(1)}>
                   Copy Text!
                 </Button>
               </Flex>
             </Flex>
-            {/* ) : null} */}
             <Flex flexDir={"column"}>
               <FormLabel>Result</FormLabel>
               <Flex
@@ -373,11 +285,14 @@ export default function Home() {
               </Flex>
               <Flex justifyContent={"end"} paddingTop={2}>
                 <Button
-                  colorScheme="grey"
-                  variant="outline"
+                  bg="gray.400"
+                  color="white"
                   paddingX={4}
                   paddingY={4}
                   maxWidth={"20%"}
+                  _hover={{
+                    bg: "gray.500",
+                  }}
                   onClick={(e: any) => copyContent(2)}>
                   Copy Text!
                 </Button>
@@ -400,11 +315,14 @@ export default function Home() {
               </Flex>
               <Flex justifyContent={"end"} paddingTop={2}>
                 <Button
-                  colorScheme="grey"
-                  variant="outline"
+                  bg="gray.400"
+                  color="white"
                   paddingX={4}
                   paddingY={4}
                   maxWidth={"20%"}
+                  _hover={{
+                    bg: "gray.500",
+                  }}
                   onClick={(e: any) => copyContent(3)}>
                   Copy Text!
                 </Button>
